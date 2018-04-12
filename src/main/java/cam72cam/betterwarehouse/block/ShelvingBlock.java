@@ -10,10 +10,12 @@ import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.state.BlockFaceShape;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
@@ -63,6 +65,17 @@ public class ShelvingBlock extends Block {
 	@Override
 	public TileEntity createTileEntity(World world, IBlockState state) {
 		return new ShelvingTile();
+	}
+
+	@Override
+	public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
+		ShelvingTile tile = ShelvingTile.get(world, pos);
+		if (tile != null && tile.isLoaded()) {
+			if (world.isRemote) {
+				player.openGui(BetterWarehouse.instance, 0, world, pos.getX(), pos.getY(), pos.getZ());
+			}
+		}
+		return false;
 	}
 	
 	@Override

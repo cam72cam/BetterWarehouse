@@ -1,12 +1,16 @@
 package cam72cam.betterwarehouse;
 
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.network.NetworkRegistry;
+
 import org.apache.logging.log4j.Logger;
 
 import cam72cam.betterwarehouse.block.ShelvingBlock;
+import cam72cam.betterwarehouse.proxy.CommonProxy;
 
 @Mod(modid = BetterWarehouse.MODID, name = BetterWarehouse.NAME, version = BetterWarehouse.VERSION)
 public class BetterWarehouse
@@ -19,6 +23,9 @@ public class BetterWarehouse
 	public static BetterWarehouse instance;
 	
 	public static ShelvingBlock SHELVING_BLOCK = new ShelvingBlock();
+	
+	@SidedProxy(clientSide="cam72cam.betterwarehouse.proxy.ClientProxy", serverSide="cam72cam.betterwarehouse.proxy.ServerProxy")
+	public static CommonProxy proxy;
 
     @EventHandler
     public void preInit(FMLPreInitializationEvent event)
@@ -30,7 +37,7 @@ public class BetterWarehouse
     @EventHandler
     public void init(FMLInitializationEvent event)
     {
-    	
+    	NetworkRegistry.INSTANCE.registerGuiHandler(instance, proxy);
     }
     
     public static void debug(String msg, Object...params) {

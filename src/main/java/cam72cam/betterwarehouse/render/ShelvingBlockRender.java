@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cam72cam.betterwarehouse.block.ShelvingBlock;
-import net.minecraft.block.BlockFence;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.BakedQuad;

@@ -112,6 +112,10 @@ public class ShelvingTile extends TileEntity {
 	public IBlockState getState() {
 		return state;
 	}
+
+	public int getSize() {
+		return size;
+	}
 	
 	/*
 	 * SYNC MAGIC
