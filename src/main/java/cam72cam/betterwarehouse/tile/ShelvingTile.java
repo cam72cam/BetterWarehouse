@@ -7,8 +7,12 @@ import net.minecraft.nbt.NBTUtil;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.items.CapabilityItemHandler;
+import net.minecraftforge.items.ItemStackHandler;
 
 public class ShelvingTile extends TileEntity {
 	public static ShelvingTile get(IBlockAccess world, BlockPos pos) {
@@ -25,8 +29,27 @@ public class ShelvingTile extends TileEntity {
 	private IBlockState state;
 	private boolean isLoaded = false;
 	
+
+	private ItemStackHandler container = new ItemStackHandler(0) {
+        @Override
+        protected void onContentsChanged(int slot) {
+        	markDirty();
+        }
+    };
+	
 	public boolean isLoaded() {
 		return this.hasWorld() && isLoaded;
+	}
+	
+	public boolean isOrigin() {
+		return this.isLoaded() && this.offset.equals(BlockPos.ORIGIN);
+	}
+	
+	public ShelvingTile getOrigin() {
+		if (!isOrigin()) {
+			return ShelvingTile.get(world, center);
+		}
+		return this;
 	}
 
 	public void init(int size, BlockPos center, BlockPos offset, IBlockState state) {
@@ -34,8 +57,13 @@ public class ShelvingTile extends TileEntity {
 		this.center = center;
 		this.offset = offset;
 		this.state = state;
-		this.markDirty();
 		this.isLoaded = true;
+		
+		if (isOrigin()) {
+			container.setSize(size * 9);
+		}
+		
+		this.markDirty();
 	}
 	
 	@Override
@@ -46,6 +74,8 @@ public class ShelvingTile extends TileEntity {
 		center = NBTUtil.getPosFromTag(nbt.getCompoundTag("center"));
 		offset = NBTUtil.getPosFromTag(nbt.getCompoundTag("offset"));
 		state = NBTUtil.readBlockState(nbt.getCompoundTag("state"));
+		container.deserializeNBT(nbt.getCompoundTag("container"));
+		
 		
 		this.isLoaded = true;
 	}
@@ -58,13 +88,14 @@ public class ShelvingTile extends TileEntity {
 		nbt.setTag("center", NBTUtil.createPosTag(center));
 		nbt.setTag("offset", NBTUtil.createPosTag(offset));
 		nbt.setTag("state", NBTUtil.writeBlockState(new NBTTagCompound(), state));
+		nbt.setTag("container", container.serializeNBT());
 		
 		return nbt;
 	}
 
 	public void onBreak() {
 		world.setBlockState(getPos(), state);
-		if (!this.offset.equals(BlockPos.ORIGIN)) {
+		if (!this.isOrigin()) {
 			if (this.getWorld().getBlockState(center).getBlock() == BetterWarehouse.SHELVING_BLOCK) {
 				this.getWorld().destroyBlock(center, true);
 				this.getWorld().destroyBlock(getPos(), true);
@@ -122,4 +153,34 @@ public class ShelvingTile extends TileEntity {
 		super.handleUpdateTag(tag);
 		world.markBlockRangeForRenderUpdate(getPos(), getPos());
 	}
+	
+	/*
+	 * Capabilities
+	 */
+	
+	@Override
+    public boolean hasCapability(Capability<?> capability, EnumFacing facing) {
+		if (this.isOrigin()) {
+			return capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY;
+		} else if (this.isLoaded()) {
+			ShelvingTile origin = this.getOrigin();
+        	if (origin != null) {
+        		return origin.hasCapability(capability, facing);
+        	}
+		}
+		return super.hasCapability(capability, facing);
+    }
+
+	@Override
+    public <T> T getCapability(Capability<T> capability, EnumFacing facing) {
+        if (this.isOrigin()) {
+        	return CapabilityItemHandler.ITEM_HANDLER_CAPABILITY.cast(container);
+		} else if (this.isLoaded()) {
+			ShelvingTile origin = this.getOrigin();
+        	if (origin != null) {
+        		return origin.getCapability(capability, facing);
+        	}
+		}
+		return super.getCapability(capability, facing);
+    }
 }
