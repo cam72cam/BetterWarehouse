@@ -22,6 +22,9 @@ public class ShelvingTile extends TileEntity {
 		}
 		return null;
 	}
+	
+	public static final int INV_ROWS = 6;
+	public static final int INV_WIDTH_MULT = 2;
 
 	private int size;
 	private BlockPos center;
@@ -60,7 +63,7 @@ public class ShelvingTile extends TileEntity {
 		this.isLoaded = true;
 		
 		if (isOrigin()) {
-			container.setSize(size * 9);
+			container.setSize(size * INV_WIDTH_MULT * INV_ROWS);
 		}
 		
 		this.markDirty();

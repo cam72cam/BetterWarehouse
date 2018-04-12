@@ -14,8 +14,8 @@ public class ShelvingContainer extends ContainerBase {
 
 	public ShelvingContainer(IInventory playerInventory, ShelvingTile shelving) {
 		this.shelving = shelving;
-        this.horizSlots = 9;
-		this.numRows = shelving.getSize();
+        this.horizSlots = shelving.getSize() * ShelvingTile.INV_WIDTH_MULT;
+		this.numRows = ShelvingTile.INV_ROWS;
 		this.numSlots = numRows * horizSlots; 
 		
 		IItemHandler itemHandler = this.shelving.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);

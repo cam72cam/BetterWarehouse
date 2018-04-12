@@ -19,7 +19,7 @@ public class ShelvingTemplate {
 	private static List<ShelvingTemplate> templates = new ArrayList<ShelvingTemplate>();
 
 	static {
-		for (int radius = 3; radius <= 5; radius++) {
+		for (int radius = 3; radius <= 4; radius++) {
 			for (EnumFacing facing : new EnumFacing[] { EnumFacing.EAST, EnumFacing.NORTH }) {
 				templates.add(new ShelvingTemplate(radius, facing));
 			}
