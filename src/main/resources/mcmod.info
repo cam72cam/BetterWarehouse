@@ -1,0 +1,16 @@
+[
+{
+  "modid": "betterwarehouse",
+  "name": "Better Warehouse",
+  "description": "A mod which adds full scale warehouse style storage to minecraft",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["cam72cam"],
+  "credits": "",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]
