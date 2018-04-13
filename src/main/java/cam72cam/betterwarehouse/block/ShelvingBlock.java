@@ -97,6 +97,7 @@ public class ShelvingBlock extends Block {
 		ShelvingTile tile = ShelvingTile.get(world, pos);
 		if (tile != null && tile.isLoaded()) {
 			player.openGui(BetterWarehouse.instance, 0, world, pos.getX(), pos.getY(), pos.getZ());
+			return true;
 		}
 		return false;
 	}
