@@ -17,6 +17,7 @@ public class ShelvingTileRender extends TileEntitySpecialRenderer<ShelvingTile> 
             GL11.glPushMatrix();
             {
             	GL11.glTranslated(x+0.5, y+0.5, z+0.5);
+            	GL11.glRotated(te.getFacing().getHorizontalAngle(), 0, 1, 0);
             	
 				double scale = 0.4;
 				GL11.glScaled(scale, scale, scale);

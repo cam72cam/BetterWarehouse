@@ -9,6 +9,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
+import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.event.RegistryEvent;
@@ -42,7 +43,10 @@ public abstract class CommonProxy implements IGuiHandler {
 		
 		IBlockState block = world.getBlockState(event.getPos());
 		if (block.getBlock() == Blocks.WOODEN_SLAB) {
-			ShelvingTemplate.tryFormStorage(event.getWorld(), event.getPos());
+			if (ShelvingTemplate.tryFormStorage(event.getWorld(), event.getPos())) {
+				event.setCanceled(true);
+				event.setCancellationResult(EnumActionResult.SUCCESS);
+			}
 		}
 	}
 

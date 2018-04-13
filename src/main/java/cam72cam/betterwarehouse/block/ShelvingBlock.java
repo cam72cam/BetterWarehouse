@@ -94,9 +94,15 @@ public class ShelvingBlock extends Block {
 
 	@Override
 	public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
+		if (player.isSneaking()) {
+			return false;
+		}
+		
 		ShelvingTile tile = ShelvingTile.get(world, pos);
 		if (tile != null && tile.isLoaded()) {
-			player.openGui(BetterWarehouse.instance, 0, world, pos.getX(), pos.getY(), pos.getZ());
+			if (!world.isRemote) {
+				player.openGui(BetterWarehouse.instance, 0, world, pos.getX(), pos.getY(), pos.getZ());
+			}
 			return true;
 		}
 		return false;

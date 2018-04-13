@@ -26,13 +26,14 @@ public class ShelvingTemplate {
 		}
 	}
 
-	public static void tryFormStorage(World world, BlockPos pos) {
+	public static boolean tryFormStorage(World world, BlockPos pos) {
 		for (ShelvingTemplate template : templates) {
 			if (template.matches(world, pos)) {
 				template.place(world, pos);
-				break;
+				return true;
 			}
 		}
+		return false;
 	}
 
 	private final Map<BlockPos, Class<? extends Block>> positions;
@@ -87,7 +88,7 @@ public class ShelvingTemplate {
 			BlockPos pos = center.add(offset);
 			world.setBlockState(pos, BetterWarehouse.SHELVING_BLOCK.getDefaultState());
 			ShelvingTile shelving = ShelvingTile.get(world, pos);
-			shelving.init(radius * 2 + 1, center, offset, states.get(offset));
+			shelving.init(radius * 2 + 1, center, offset, states.get(offset), facing);
 		}
 	}
 }

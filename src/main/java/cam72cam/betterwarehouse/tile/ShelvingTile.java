@@ -41,6 +41,7 @@ public class ShelvingTile extends TileEntity {
         	markDirty();
         }
     };
+	private EnumFacing facing;
 	
 	public boolean isLoaded() {
 		return this.hasWorld() && isLoaded;
@@ -57,11 +58,12 @@ public class ShelvingTile extends TileEntity {
 		return this;
 	}
 
-	public void init(int size, BlockPos center, BlockPos offset, IBlockState state) {
+	public void init(int size, BlockPos center, BlockPos offset, IBlockState state, EnumFacing facing) {
 		this.size = size;
 		this.center = center;
 		this.offset = offset;
 		this.state = state;
+		this.facing = facing;
 		this.isLoaded = true;
 		
 		if (isOrigin()) {
@@ -79,8 +81,8 @@ public class ShelvingTile extends TileEntity {
 		center = NBTUtil.getPosFromTag(nbt.getCompoundTag("center"));
 		offset = NBTUtil.getPosFromTag(nbt.getCompoundTag("offset"));
 		state = NBTUtil.readBlockState(nbt.getCompoundTag("state"));
+		facing = EnumFacing.values()[nbt.getInteger("facing")];
 		container.deserializeNBT(nbt.getCompoundTag("container"));
-		
 		
 		this.isLoaded = true;
 	}
@@ -93,6 +95,7 @@ public class ShelvingTile extends TileEntity {
 		nbt.setTag("center", NBTUtil.createPosTag(center));
 		nbt.setTag("offset", NBTUtil.createPosTag(offset));
 		nbt.setTag("state", NBTUtil.writeBlockState(new NBTTagCompound(), state));
+		nbt.setInteger("facing", facing.ordinal());
 		nbt.setTag("container", container.serializeNBT());
 		
 		return nbt;
@@ -136,6 +139,10 @@ public class ShelvingTile extends TileEntity {
 
 	public BlockPos getOffset() {
 		return offset;
+	}
+
+	public EnumFacing getFacing() {
+		return facing;
 	}
 	
 	/*
