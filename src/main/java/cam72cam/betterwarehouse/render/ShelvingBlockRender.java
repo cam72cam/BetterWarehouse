@@ -18,13 +18,18 @@ public class ShelvingBlockRender implements IBakedModel {
 
 	@Override
 	public List<BakedQuad> getQuads(IBlockState state, EnumFacing side, long rand) {
+		List<BakedQuad> quads = new ArrayList<BakedQuad>();
 		if (state instanceof IExtendedBlockState) {
-			state = ((IExtendedBlockState)state).getValue(ShelvingBlock.STATE);
-			if (state != null && state.getBlock() != Blocks.AIR) {
-				return Minecraft.getMinecraft().getBlockRendererDispatcher().getBlockModelShapes().getModelForState(state).getQuads(state, side, rand);
+			IBlockState inner_state = ((IExtendedBlockState)state).getValue(ShelvingBlock.STATE);
+			IBlockState adtl = ((IExtendedBlockState)state).getValue(ShelvingBlock.ADTL_STATE);
+			if (inner_state != null && inner_state.getBlock() != Blocks.AIR) {
+				quads.addAll(Minecraft.getMinecraft().getBlockRendererDispatcher().getBlockModelShapes().getModelForState(inner_state).getQuads(inner_state, side, rand));
+				if (adtl != null && adtl.getBlock() != Blocks.AIR) {
+					quads.addAll(Minecraft.getMinecraft().getBlockRendererDispatcher().getBlockModelShapes().getModelForState(adtl).getQuads(adtl, side, rand));
+				}
 			}
 		}
-		return new ArrayList<BakedQuad>();
+		return quads;
 	}
 
 	@Override

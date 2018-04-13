@@ -5,6 +5,7 @@ import javax.annotation.Nonnull;
 import cam72cam.betterwarehouse.BetterWarehouse;
 import cam72cam.betterwarehouse.tile.ShelvingTile;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockFence;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.state.BlockFaceShape;
@@ -30,6 +31,7 @@ public class ShelvingBlock extends Block {
 	public static final AxisAlignedBB AIR_BB = new AxisAlignedBB(0, 0, 0, 0, 0, 0);
 	
 	public static final PropertyIBlockState STATE = new PropertyIBlockState("STATE");
+	public static final PropertyIBlockState ADTL_STATE = new PropertyIBlockState("ADTL_STATE");
 	
 	public ShelvingBlock() {
 		super(Material.WOOD);
@@ -43,7 +45,7 @@ public class ShelvingBlock extends Block {
     @Nonnull
     protected BlockStateContainer createBlockState()
     {
-        return new ExtendedBlockState(this, new IProperty[0], new IUnlistedProperty<?>[] { STATE });
+        return new ExtendedBlockState(this, new IProperty[0], new IUnlistedProperty<?>[] { STATE, ADTL_STATE });
     }
 
 	@Override
@@ -53,6 +55,29 @@ public class ShelvingBlock extends Block {
     	ShelvingTile te = ShelvingTile.get(world, pos);
     	if (te != null && te.isLoaded()) {
 			state = state.withProperty(STATE, te.getState());
+			if(te.getState().getBlock() instanceof BlockFence) {
+				if (te.getOffset().getX() == (te.getSize()-1)/2) {
+					ShelvingTile fte = ShelvingTile.get(world, pos.west());
+					if (fte != null) {
+						state = state.withProperty(ADTL_STATE, fte.getState());
+					}
+				} else if (te.getOffset().getZ() == (te.getSize()-1)/2) {
+					ShelvingTile fte = ShelvingTile.get(world, pos.north());
+					if (fte != null) {
+						state = state.withProperty(ADTL_STATE, fte.getState());
+					}
+				} else if (te.getOffset().getX() == -(te.getSize()-1)/2) {
+					ShelvingTile fte = ShelvingTile.get(world, pos.east());
+					if (fte != null) {
+						state = state.withProperty(ADTL_STATE, fte.getState());
+					}
+				} else if (te.getOffset().getZ() == -(te.getSize()-1)/2) {
+					ShelvingTile fte = ShelvingTile.get(world, pos.south());
+					if (fte != null) {
+						state = state.withProperty(ADTL_STATE, fte.getState());
+					}
+				}
+			}
     	}
         return state;
     }

@@ -123,6 +123,10 @@ public class ShelvingTile extends TileEntity {
 	public ItemStackHandler getContainer() {
 		return container;
 	}
+
+	public BlockPos getOffset() {
+		return offset;
+	}
 	
 	/*
 	 * SYNC MAGIC
