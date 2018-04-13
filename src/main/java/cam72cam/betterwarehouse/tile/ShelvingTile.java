@@ -2,6 +2,8 @@ package cam72cam.betterwarehouse.tile;
 
 import cam72cam.betterwarehouse.BetterWarehouse;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.item.EntityItem;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTUtil;
 import net.minecraft.network.NetworkManager;
@@ -102,6 +104,14 @@ public class ShelvingTile extends TileEntity {
 			if (this.getWorld().getBlockState(center).getBlock() == BetterWarehouse.SHELVING_BLOCK) {
 				this.getWorld().destroyBlock(center, true);
 				this.getWorld().destroyBlock(getPos(), true);
+			}
+		} else {
+			for (int slot = 0; slot < container.getSlots(); slot++) {
+				ItemStack itemstack = container.getStackInSlot(slot);
+				if (itemstack.getCount() != 0) {
+					world.spawnEntity(new EntityItem(this.world, this.center.getX(), this.center.getY()+1, this.center.getZ(), itemstack.copy()));
+					itemstack.setCount(0);
+				}
 			}
 		}
 	}
