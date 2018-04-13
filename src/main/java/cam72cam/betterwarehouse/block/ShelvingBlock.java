@@ -1,6 +1,9 @@
 package cam72cam.betterwarehouse.block;
 
+import java.util.List;
+
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import cam72cam.betterwarehouse.BetterWarehouse;
 import cam72cam.betterwarehouse.tile.ShelvingTile;
@@ -13,6 +16,7 @@ import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.state.BlockFaceShape;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumBlockRenderType;
@@ -157,7 +161,28 @@ public class ShelvingBlock extends Block {
 	}
 	
 	@Override
-	public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess world, BlockPos pos) {
+	public boolean isTopSolid(IBlockState state) {
+		return false;
+	}
+	
+	public void addCollisionBoxToList(IBlockState state, World world, BlockPos pos, AxisAlignedBB entityBox, List<AxisAlignedBB> collidingBoxes, @Nullable Entity entityIn, boolean isActualState)
+    {
+        if (!isActualState)
+        {
+            state = state.getActualState(world, pos);
+        }
+
+        addCollisionBoxToList(pos, entityBox, collidingBoxes, getActualBoundingBox(state, world, pos));
+
+        ShelvingTile tile = ShelvingTile.get(world, pos);
+		if (tile != null && tile.isLoaded()) {
+	        if (tile.getState().getBlock() instanceof BlockFence && tile.getOffset().getY() == 0) {
+	        	addCollisionBoxToList(pos, entityBox, collidingBoxes, SLAB_BB);	
+	        }
+		}
+    }
+	
+	public AxisAlignedBB getActualBoundingBox(IBlockState state, IBlockAccess world, BlockPos pos) {
 		ShelvingTile tile = ShelvingTile.get(world, pos);
 		if (tile != null && tile.isLoaded()) {
 			state = tile.getState();
@@ -184,14 +209,35 @@ public class ShelvingBlock extends Block {
 	}
 	
 	@Override
-	public AxisAlignedBB getCollisionBoundingBox(IBlockState state, IBlockAccess world, BlockPos pos) {
-		return this.getBoundingBox(state, world, pos);
-	}
-	
-	@Override
-	public AxisAlignedBB getSelectedBoundingBox(IBlockState state, World world, BlockPos pos) {
-		return this.getBoundingBox(state, world, pos);
-		
+	public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess world, BlockPos pos) {
+		ShelvingTile tile = ShelvingTile.get(world, pos);
+		if (tile != null && tile.isLoaded()) {
+			state = tile.getState();
+			if (state.getBlock() instanceof BlockAir) {
+				return AIR_BB;
+			}
+			if (state.getBlock() instanceof BlockSlab) {
+				return SLAB_BB;
+			}
+			if (state.getBlock() instanceof BlockFence) {
+				int radius = (tile.getSize()-1)/2;
+				AxisAlignedBB bb = null;
+				if (tile.getOffset().getX() == radius) {
+					bb = SIDES_BB_WEST;
+				} else if (tile.getOffset().getZ() == radius) {
+					bb = SIDES_BB_NORTH;
+				} else if (tile.getOffset().getX() == -radius) {
+					bb = SIDES_BB_EAST;
+				} else if (tile.getOffset().getZ() == -radius) {
+					bb = SIDES_BB_SOUTH;
+				}
+				if (bb != null && tile.getOffset().getY() == 0) {
+					bb = bb.union(SLAB_BB);
+				}
+				return bb;
+			}
+		}
+		return AIR_BB;
 	}
 	
 	@Override
