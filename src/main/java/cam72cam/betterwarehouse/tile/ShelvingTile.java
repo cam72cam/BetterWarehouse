@@ -10,13 +10,17 @@ import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.ITickable;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.items.CapabilityItemHandler;
+import net.minecraftforge.items.IItemHandler;
+import net.minecraftforge.items.IItemHandlerModifiable;
+import net.minecraftforge.items.ItemHandlerHelper;
 import net.minecraftforge.items.ItemStackHandler;
 
-public class ShelvingTile extends TileEntity {
+public class ShelvingTile extends TileEntity implements ITickable {
 	public static ShelvingTile get(IBlockAccess world, BlockPos pos) {
 		TileEntity te = world.getTileEntity(pos);
 		if (te instanceof ShelvingTile) {
@@ -125,6 +129,31 @@ public class ShelvingTile extends TileEntity {
 		}
 	}
 
+	@Override
+	public void update() {
+		if (world.isRemote) {
+			return;
+		}
+		if (!this.isOrigin()) {
+			return;
+		}
+		ShelvingTile up = ShelvingTile.get(world, getPos().up(2));
+		if (up != null && up.isOrigin()) {
+			ItemStackHandler upc = up.getContainer();
+			for (int upslot = 0; upslot < upc.getSlots(); upslot ++) {
+				ItemStack stack = upc.getStackInSlot(upslot);
+				if (stack.isEmpty()) {
+					continue;
+				}
+				int count = stack.getCount();
+				stack = ItemHandlerHelper.insertItem(container, stack, false);
+				if (stack.getCount() != count) {
+					upc.setStackInSlot(upslot, stack);
+				}
+			}
+		}
+	}
+
 	public IBlockState getState() {
 		return state;
 	}
@@ -205,8 +234,37 @@ public class ShelvingTile extends TileEntity {
 
 	@Override
     public <T> T getCapability(Capability<T> capability, EnumFacing facing) {
-        if (this.isOrigin()) {
-        	return CapabilityItemHandler.ITEM_HANDLER_CAPABILITY.cast(container);
+        if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY && this.isOrigin()) {
+        	return CapabilityItemHandler.ITEM_HANDLER_CAPABILITY.cast(new IItemHandlerModifiable() {
+				@Override
+				public int getSlots() { return container.getSlots(); }
+				@Override
+				public ItemStack getStackInSlot(int slot) { return container.getStackInSlot(slot); }
+				@Override
+				public ItemStack extractItem(int slot, int amount, boolean simulate) { return container.extractItem(slot, amount, simulate); }
+				@Override
+				public int getSlotLimit(int slot) { return container.getSlotLimit(slot); }
+
+				@Override
+				public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
+					stack = container.insertItem(slot, stack, simulate);
+					
+					if (!stack.isEmpty()) {
+						ShelvingTile up = ShelvingTile.get(world, getPos().up(2));
+						if (up != null && up.isOrigin()) {
+							IItemHandler uph = (IItemHandler) up.getCapability(capability, facing);
+							stack = uph.insertItem(slot, stack, simulate);
+						}
+					}
+					
+					return stack;
+				}
+				
+				@Override
+				public void setStackInSlot(int slot, ItemStack stack) {
+					container.setStackInSlot(slot, stack);
+				}
+        	});
 		} else if (this.isLoaded()) {
 			ShelvingTile origin = this.getOrigin();
         	if (origin != null) {
