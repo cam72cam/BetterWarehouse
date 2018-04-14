@@ -11,6 +11,7 @@ import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraftforge.common.capabilities.Capability;
@@ -272,5 +273,14 @@ public class ShelvingTile extends TileEntity implements ITickable {
         	}
 		}
 		return super.getCapability(capability, facing);
+    }
+	
+	@Override
+	public AxisAlignedBB getRenderBoundingBox() {
+		if (this.isOrigin()) {
+			return new AxisAlignedBB(this.pos, this.pos.add(new BlockPos(size, 3, size))).offset(-size/2, 0, -size/2);
+		} else {
+			return super.getRenderBoundingBox();
+		}
     }
 }
